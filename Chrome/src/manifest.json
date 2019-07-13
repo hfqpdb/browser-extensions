@@ -1,0 +1,34 @@
+{
+  "name": "Harbor Freight Coupon Database",
+  "short_name": "HFQPDB Chrome Extension",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Provide coupon information directly on Harbor Freight website.",
+  "permissions": [
+    "https://www.hfqpdb.com/price_check/*",
+    "webNavigation"
+  ],
+  "background": {
+    "scripts": [
+      "scripts/background/main.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.harborfreight.com/*",
+        "https://shop.harborfreight.com/*"
+      ],
+      "js": [
+        "scripts/content/overlay.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "externally_connectable": {
+    "matches": [
+      "*://*.hfqpdb.com/*"
+    ]
+  }
+}
