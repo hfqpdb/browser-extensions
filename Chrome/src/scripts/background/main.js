@@ -20,6 +20,7 @@ let ports = {};
 
 // Accept connections from the content scripts.
 chrome.runtime.onConnect.addListener((port) => {
+    console.log('Opening new port', port.name);
     ports[port.name] = port;
     port.onMessage.addListener((message) => {
         console.log('Message received:', message);
@@ -31,8 +32,9 @@ chrome.runtime.onConnect.addListener((port) => {
             port.postMessage({error: "Invalid action."});
         }
     });
-    port.onDisconnect.addListener(() => {
-        delete ports[this.name];
+    port.onDisconnect.addListener((port) => {
+        console.log('Disconnection of port', port.name);
+        delete ports[port.name];
     });
 });
 
@@ -45,8 +47,13 @@ chrome.runtime.onMessageExternal.addListener((message, sender, callback) => {
 chrome.webNavigation['onHistoryStateUpdated'].addListener(function (data) {
     if (typeof data) {
         Object.getOwnPropertyNames(ports).forEach((port) => {
-            console.log('Sending port ' + port + ' updateContent message.');
-            ports[port].postMessage({action: "updateContent"});
+            setTimeout(
+                () => {
+                    console.log('Sending port ' + port + ' updateContent message.');
+                    ports[port].postMessage({action: "updateContent"});
+                },
+                500
+            );
         });
     }
 });

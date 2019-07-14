@@ -6,7 +6,10 @@ const findPrices = () => {
         prices = document.body.querySelectorAll("div[class^='price__info']");
     }
 
-    // TODO Find prices on grid view.
+    if (!prices.length) {
+        prices = document.body.querySelectorAll("p[class^='grid__price']");
+    }
+
     console.log('Price search returned', prices);
     return prices;
 };
@@ -32,12 +35,35 @@ const skuSearch = () => {
     return matches.length ? matches[1] : false;
 };
 
+const gridSearch = (price) => {
+    console.log('Finding item number in grid element.', price);
+    let itemNumber;
+    let item = price.closest('[class^=grid__item]');
+    let productLink = item ? item.querySelector("a[href*='product/view/id']") : false;
+
+    if (productLink) {
+        itemNumber = productLink.href
+            .match(/product\/view\/id\/\d+\//)
+            .pop()
+            .match(/\d+/);
+    } else if (item) {
+        // Attempt to find this via the traditional link. Merchandising promotions use this format.
+        itemNumber = item.querySelector('a[href$=html]')
+            .href
+            .match(/-\d+\.html/)
+            .pop()
+            .match(/\d+/);
+    }
+
+    return itemNumber || false;
+};
+
 const listSearch = (price) => {
     console.log('Checking for list price structure.', price);
     let item = price.closest('[id^=item_]') || false;
 
     if (item) {
-         item = item.querySelector("a[href$='html']")
+        item = item.querySelector("a[href$='html']")
             .href
             .match(/-\d+\.html/)
             .pop()
@@ -48,7 +74,7 @@ const listSearch = (price) => {
 };
 
 const itemNumberFor = (price) => {
-    return skuSearch() || listSearch(price);
+    return gridSearch(price) || skuSearch() || listSearch(price);
 };
 
 const findCoupon = (item) => {
@@ -95,7 +121,7 @@ port.onMessage.addListener((message) => {
     }
 
     if (message.data.error) {
-        console.error(message.data.error);
+        console.warn(message.data.error);
     }
 });
 
