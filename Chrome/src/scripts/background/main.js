@@ -1,13 +1,15 @@
-const isFunction = (name) => {
-    return name && {}.toString.call(name) === '[object Function]';
-};
-
-const priceCheck = (callback, payload) => {
+console.log('Starting background process.');
+const priceCheck = (returnPort, payload) => {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (this.readyState === 4) {
             let data = JSON.parse(this.responseText);
-            callback(data);
+            console.log('Sending coupon data ' + this.responseText + ' for ' + payload.item);
+            returnPort.postMessage({
+                action: 'couponData',
+                data: data,
+                item: payload.item
+            });
         }
     };
     xhr.open("GET", "https://www.hfqpdb.com/price_check/" + payload.item);
@@ -20,9 +22,9 @@ let ports = {};
 chrome.runtime.onConnect.addListener((port) => {
     ports[port.name] = port;
     port.onMessage.addListener((message) => {
-        let action = message.action;
-        if (isFunction(action)) {
-            action(port.postMessage, message.payload);
+        console.log('Message received:', message);
+        if (message.action === 'priceCheck') {
+            priceCheck(port, message.payload);
 
             return true;
         } else {
@@ -36,21 +38,15 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Accept messages from allowed sites to check for the extension.
 chrome.runtime.onMessageExternal.addListener((message, sender, callback) => {
-    let action = message.action;
-    if (isFunction(action)) {
-        action(callback, message.payload);
-
-        return true;
-    } else {
-        callback({installed: true});
-    }
+    callback({installed: true});
 });
 
 // Trigger update of the overlay on a change to the browser history.
 chrome.webNavigation['onHistoryStateUpdated'].addListener(function (data) {
     if (typeof data) {
-        ports.forEach((port) => {
-            port.postMessage({action: "updateContent"});
+        Object.getOwnPropertyNames(ports).forEach((port) => {
+            console.log('Sending port ' + port + ' updateContent message.');
+            ports[port].postMessage({action: "updateContent"});
         });
     }
 });
