@@ -10,6 +10,10 @@ const findPrices = () => {
         prices = document.body.querySelectorAll("p[class^='grid__price']");
     }
 
+    if (!prices.length) {
+        prices = document.body.querySelectorAll("div[class='cart_item_unit_price_dollars']");
+    }
+
     console.log('Price search returned', prices);
     return prices;
 };
@@ -73,8 +77,23 @@ const listSearch = (price) => {
     return item;
 };
 
+const cartSearch = (price) => {
+    console.log('Checking for cart price structure.', price);
+    let item = price.parentNode.parentNode.childNodes[3] || false;
+
+    if (item) {
+        item = item.querySelector("a[href$='html']")
+            .href
+            .match(/-\d+\.html/)
+            .pop()
+            .match(/\d+/);
+    }
+
+    return item;
+};
+
 const itemNumberFor = (price) => {
-    return gridSearch(price) || skuSearch() || listSearch(price);
+    return gridSearch(price) || skuSearch() || listSearch(price) || cartSearch(price);
 };
 
 const findCoupon = (item) => {
@@ -91,14 +110,22 @@ const addCoupon = (price, data) => {
     console.log('Adding coupon to item.');
     let itemCoupon = coupon.cloneNode(true);
     itemCoupon.href = data.url;
-    itemCoupon.querySelector('.discount.text').innerText = data.bestPrice;
+    itemCoupon.querySelector('.discount.text').innerText = "$" + data.bestPrice;
 
     price.appendChild(itemCoupon);
 };
 
 let coupon = document.createElement('a');
-let discountText = document.createElement('div');
+let couponImg = document.createElement('img');
+let discountText = document.createElement('span');
+couponImg.setAttribute('src', "https://www.hfqpdb.com/android-app/hfqpdb_logo.png");
+couponImg.setAttribute('width', "30px");
+couponImg.setAttribute(
+    'style',
+    "vertical-align: -8px;"
+);
 discountText.classList.add('discount', 'text');
+coupon.appendChild(couponImg);
 coupon.appendChild(discountText);
 coupon.setAttribute('target', '_blank');
 coupon.setAttribute(

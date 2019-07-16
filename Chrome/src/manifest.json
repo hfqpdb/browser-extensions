@@ -30,5 +30,12 @@
     "matches": [
       "*://*.hfqpdb.com/*"
     ]
+  },
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon32.png"
   }
 }
