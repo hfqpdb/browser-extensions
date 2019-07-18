@@ -130,7 +130,7 @@ coupon.appendChild(discountText);
 coupon.setAttribute('target', '_blank');
 coupon.setAttribute(
     'style',
-    "display: inline-block; border: 2px dashed #308104; color: #308104; padding: 0.5rem;"
+    "display: inline-block; border: 2px dashed #308104; color: #308104; padding: 0.5rem; font-size: 1.4em; white-space: nowrap"
 );
 coupon.title = 'Provided by hfqpdb.com';
 
